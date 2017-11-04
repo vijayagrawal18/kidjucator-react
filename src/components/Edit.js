@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import * as R from 'ramda';
 import '../styles/App.css';
-import {database} from '../DataStore';
+import {database, login, logout, currentUser} from '../DataStore';
 import AppLayout from './AppLayout';
 import ListPanel from './ListPanel';
 import ItemForm from './ItemForm';
@@ -16,8 +16,11 @@ class Edit extends Component {
     this._newItem = { id: "new" };
 
     this.dbItemKey = "my-items";
+    currentUser(console.log);
 
     this.state = {
+      uid: null,
+      owner: null,
       allItems: {},
       selectedItemId: this._newItem.id,
     };
@@ -29,6 +32,15 @@ class Edit extends Component {
 
   componentWillUnmount(){
     database.removeBinding(this.ref);
+  }
+
+  componentDidMount() {
+    this._notificationSystem = this.refs.notificationSystem;
+    currentUser(user => {
+      if(user){
+        this.setState({uid: user.uid});
+      }
+    })
   }
 
   setSelectedItem = selectedItemId => {
@@ -43,14 +55,26 @@ class Edit extends Component {
     this.setState({ allItems })
   }
 
-  componentDidMount = () => {
-    this._notificationSystem = this.refs.notificationSystem;
-  }
-
   itemsWithNewTemplate = () => {
     var allItems = {...this.state.allItems}
     allItems[this._newItem.id] = this._newItem;
     return allItems;
+  }
+
+  authenticate = () => {
+    login(this.authHandler);
+  }
+
+  authHandler = user => {
+    const uid = user.uid;
+    this.setState({uid})
+    console.log(user);
+    console.log("2 user");
+    currentUser(console.log);
+  }
+
+  signout = () => {
+    logout(() => this.setState({uid: null}));
   }
 
   _validInput = item => {
@@ -104,9 +128,25 @@ class Edit extends Component {
 
   renderMainArea = () => <ItemForm saveItem={this.saveItem} item={this._getSelectedItem()} />;
 
+  renderLogin = () => {
+    return (
+      <nav className="login">
+        <h2> Edit Items </h2>
+        <p> Please login </p>
+        <button className="github" onClick={this.authenticate}>Login with Github</button>
+      </nav>
+      );
+  }
+
   render() {
+    const logout = <button className="logout" onClick={this.signout}>Log Out!</button>
+
+    if(!this.state.uid)
+      return this.renderLogin();
+
     return (
       <div>
+        {logout}
         <NotificationSystem ref="notificationSystem" />
         <AppLayout mainArea={this.renderMainArea} sidePanel={this.renderSidePanel} />
       </div>
