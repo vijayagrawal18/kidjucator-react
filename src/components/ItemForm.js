@@ -25,7 +25,7 @@ class ItemForm extends React.Component{
         <tbody>
           <tr className="input-item">
             <td><label htmlFor="name">Name</label></td>
-            <td><input className="form-name" defaultValue={item.name} ref={i => this.name = i} type="text"/></td>
+            <td><input autoFocus className="form-name" defaultValue={item.name} ref={i => this.name = i} type="text"/></td>
           </tr>
           <tr className="input-item">
             <td><label htmlFor="imageUrl">Image Url</label></td>

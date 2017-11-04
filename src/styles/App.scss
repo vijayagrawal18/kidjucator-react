@@ -59,6 +59,23 @@ a.btn, button {
   }
 }
 
+.login-screen {
+  text-align: center;
+  vertical-align:middle;
+  line-height: 50vh;
+  height: 100vh;
+  background-color: #73ebae;
+
+  .login-form {
+    width: 250px;
+    display: inline-block;
+    text-align: center;
+    vertical-align:middle;
+    padding: 10px;
+    border:  #27f 5px solid;
+    line-height: 12px;
+  }
+}
 /*
 @keyframes app-key1-spin {
   from { transform: translateY(-250%); }

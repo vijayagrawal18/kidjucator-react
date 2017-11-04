@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import * as R from 'ramda';
 import '../styles/App.css';
-import {database} from '../DataStore';
+import {database, logout, currentUser} from '../DataStore';
 import AppLayout from './AppLayout';
+import Login from './Login';
 import ListPanel from './ListPanel';
 import ItemForm from './ItemForm';
 import { sampleItems } from '../samples/items';
@@ -18,6 +19,8 @@ class Edit extends Component {
     this.dbItemKey = "my-items";
 
     this.state = {
+      uid: null,
+      owner: null,
       allItems: {},
       selectedItemId: this._newItem.id,
     };
@@ -29,6 +32,15 @@ class Edit extends Component {
 
   componentWillUnmount(){
     database.removeBinding(this.ref);
+  }
+
+  componentDidMount() {
+    currentUser(this.authHandler)
+  }
+
+  componentDidUpdate() {
+    if(!this._notificationSystem)
+      this._notificationSystem = this.refs.notificationSystem;
   }
 
   setSelectedItem = selectedItemId => {
@@ -43,14 +55,19 @@ class Edit extends Component {
     this.setState({ allItems })
   }
 
-  componentDidMount = () => {
-    this._notificationSystem = this.refs.notificationSystem;
-  }
-
   itemsWithNewTemplate = () => {
     var allItems = {...this.state.allItems}
     allItems[this._newItem.id] = this._newItem;
     return allItems;
+  }
+
+  authHandler = user => {
+    const uid = user.uid;
+    this.setState({uid})
+  }
+
+  signout = () => {
+    logout(() => this.setState({uid: null}));
   }
 
   _validInput = item => {
@@ -105,8 +122,14 @@ class Edit extends Component {
   renderMainArea = () => <ItemForm saveItem={this.saveItem} item={this._getSelectedItem()} />;
 
   render() {
+    const logout = <button className="logout" onClick={this.signout}>Log Out!</button>
+
+    if(!this.state.uid)
+      return (<Login authSuccessCallback={this.authHandler}/>);
+
     return (
       <div>
+        {logout}
         <NotificationSystem ref="notificationSystem" />
         <AppLayout mainArea={this.renderMainArea} sidePanel={this.renderSidePanel} />
       </div>
