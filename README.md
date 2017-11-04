@@ -1,2 +1,2 @@
-# kidjucator-react
+# kidjucator
 App for toddlers
